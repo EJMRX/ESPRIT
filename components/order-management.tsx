@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Calendar,
   Filter,
@@ -18,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  MoreVertical,
 } from "lucide-react"
 
 interface OrderManagementProps {
@@ -25,93 +27,140 @@ interface OrderManagementProps {
 }
 
 const orderStats = [
-  { count: "46258", label: "Toutes les CMD", color: "bg-gray-100", icon: "📋" },
-  { count: "7", label: "Panier abandonné", color: "bg-orange-100", icon: "🛒" },
-  { count: "11", label: "En attente", color: "bg-yellow-100", icon: "⏳" },
-  { count: "80", label: "Confirmées", color: "bg-blue-100", icon: "✅" },
-  { count: "271", label: "Prêt à expédier", color: "bg-green-100", icon: "📦" },
-  { count: "866", label: "Retour non reçues", color: "bg-red-100", icon: "↩️" },
-  { count: "2636", label: "Expédiées", color: "bg-purple-100", icon: "🚚" },
-  { count: "5861", label: "Livrées", color: "bg-green-200", icon: "✅" },
-  { count: "4070", label: "Annulées", color: "bg-red-200", icon: "❌" },
+  { count: "46468", label: "Toutes CMD", color: "bg-blue-100", icon: "📋" },
+  { count: "0", label: "Panier abandonné", color: "bg-orange-100", icon: "🛒" },
+  { count: "33", label: "En attente", color: "bg-yellow-100", icon: "⏳" },
+  { count: "2", label: "Confirmées", color: "bg-green-100", icon: "✅" },
+  { count: "493", label: "Prêt à expédier", color: "bg-blue-200", icon: "📦" },
+  { count: "876", label: "Retour non reçues", color: "bg-red-100", icon: "↩️" },
+  { count: "2655", label: "Expédiées", color: "bg-purple-100", icon: "🚚" },
+  { count: "5870", label: "Livrées", color: "bg-green-200", icon: "✅" },
+  { count: "4084", label: "Annulées", color: "bg-red-200", icon: "❌" },
+]
+
+const availableColumns = [
+  { id: "client", label: "Client", visible: true },
+  { id: "reference", label: "Référence", visible: true },
+  { id: "status", label: "Status", visible: true },
+  { id: "gouvernorat", label: "Gouvernorat", visible: true },
+  { id: "total", label: "Total", visible: true },
+  { id: "reste_a_payer", label: "Reste à Payer", visible: false },
+  { id: "transporteur", label: "Transporteur", visible: true },
+  { id: "nb_articles", label: "NB articles", visible: true },
+  { id: "creee_par", label: "Créée par", visible: true },
+  { id: "remise", label: "Remise", visible: false },
+  { id: "payee_le", label: "Payée Le", visible: false },
+  { id: "email", label: "Email", visible: false },
+  { id: "commentaire", label: "Commentaire", visible: false },
+  { id: "tel", label: "Tél", visible: true },
+  { id: "tel2", label: "Tél 2", visible: false },
+  { id: "code_tva", label: "Code TVA", visible: false },
+  { id: "a_livrer_le", label: "À Livrer Le", visible: false },
+  { id: "creee_le", label: "Créée Le", visible: false },
+  { id: "pays", label: "Pays", visible: false },
+  { id: "transport_code", label: "Transport Code", visible: false },
+  { id: "modifie_par", label: "Modifié Par", visible: false },
+  { id: "dispo", label: "Dispo", visible: false },
+  { id: "messanger", label: "Messanger", visible: false },
+  { id: "num_facture", label: "Num de Facture", visible: false },
+  { id: "details", label: "Détails", visible: false },
+  { id: "produits", label: "Produits", visible: false },
+  { id: "paye", label: "Payé", visible: false },
+  { id: "source", label: "Source", visible: false },
+  { id: "modifiee_le", label: "Modifiée Le", visible: false },
+  { id: "enseigne", label: "Enseigne", visible: false },
 ]
 
 const sampleOrders = [
   {
     id: 1,
-    client: "OUMAIMA",
-    reference: "40517",
-    governorate: "Sousse",
-    total: "58,500 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "99 532 898",
+    client: "WISSAL",
+    reference: "45669",
+    status: "En attente",
+    gouvernorat: "Nabeul",
+    total: "43,000 TND",
+    transporteur: "FIRST",
+    nb_articles: 1,
+    creee_par: "Esprit Jeune",
+    tel: "23 559 214",
     selected: false,
   },
   {
     id: 2,
-    client: "MARIEM",
-    reference: "33460",
-    governorate: "Siliana",
-    total: "7,500 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "28 057 465",
+    client: "IMEB",
+    reference: "45668",
+    status: "En attente",
+    gouvernorat: "Mahdia",
+    total: "78,000 TND",
+    transporteur: "FIRST",
+    nb_articles: 2,
+    creee_par: "Esprit Jeune",
+    tel: "92 185 519",
     selected: false,
   },
   {
     id: 3,
-    client: "OLFA",
-    reference: "33459",
-    governorate: "Medenine",
-    total: "3,000 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "51 740 031",
+    client: "RANIM",
+    reference: "45667",
+    status: "En attente",
+    gouvernorat: "Gafsa",
+    total: "43,000 TND",
+    transporteur: "FIRST",
+    nb_articles: 1,
+    creee_par: "Esprit Jeune",
+    tel: "29 383 028",
     selected: false,
   },
   {
     id: 4,
-    client: "INES",
-    reference: "33451",
-    governorate: "Nabeul",
-    total: "72,500 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "96 520 486",
+    client: "SONIA",
+    reference: "45666",
+    status: "En attente",
+    gouvernorat: "Mannouba",
+    total: "40,500 TND",
+    transporteur: "FIRST",
+    nb_articles: 1,
+    creee_par: "Esprit Jeune",
+    tel: "97 020 422",
     selected: false,
   },
   {
     id: 5,
-    client: "RAWEN",
-    reference: "33450",
-    governorate: "Mahdia",
-    total: "57,500 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "42 185 410",
+    client: "DALANDA",
+    reference: "45665",
+    status: "En attente",
+    gouvernorat: "Ariana",
+    total: "112,000 TND",
+    transporteur: "FIRST",
+    nb_articles: 4,
+    creee_par: "Esprit Jeune",
+    tel: "20 828 144",
     selected: false,
   },
   {
     id: 6,
-    client: "NORHEN",
-    reference: "33449",
-    governorate: "Nabeul",
-    total: "37,500 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "28 358 339",
+    client: "AWES",
+    reference: "45664",
+    status: "Confirmées",
+    gouvernorat: "Sousse",
+    total: "8,000 TND",
+    transporteur: "FIRST",
+    nb_articles: 1,
+    creee_par: "Esprit Jeune",
+    tel: "50 508 090",
     selected: false,
   },
   {
     id: 7,
-    client: "FARAH JERIDI",
-    reference: "33444",
-    governorate: "Tunis",
-    total: "36,500 TND",
-    transport: "FIRST",
-    createdBy: "Esprit Jeune",
-    phone: "46 205 500",
+    client: "RETOUR AWES",
+    reference: "45664",
+    status: "Retour non reçues",
+    gouvernorat: "Sousse",
+    total: "43,000 TND",
+    transporteur: "FIRST",
+    nb_articles: 1,
+    creee_par: "Esprit Jeune",
+    tel: "50 508 090",
     selected: false,
   },
 ]
@@ -121,6 +170,8 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(100)
+  const [columnSettings, setColumnSettings] = useState(availableColumns)
+  const [showColumnSelector, setShowColumnSelector] = useState(false)
 
   const handleSelectOrder = (orderId: number) => {
     setSelectedOrders((prev) => (prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [...prev, orderId]))
@@ -131,6 +182,25 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
       setSelectedOrders([])
     } else {
       setSelectedOrders(sampleOrders.map((order) => order.id))
+    }
+  }
+
+  const toggleColumnVisibility = (columnId: string) => {
+    setColumnSettings((prev) => prev.map((col) => (col.id === columnId ? { ...col, visible: !col.visible } : col)))
+  }
+
+  const visibleColumns = columnSettings.filter((col) => col.visible)
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "En attente":
+        return "bg-yellow-100 text-yellow-800"
+      case "Confirmées":
+        return "bg-blue-100 text-blue-800"
+      case "Retour non reçues":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
     }
   }
 
@@ -182,6 +252,16 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
             />
             <Select>
               <SelectTrigger className="w-32">
+                <SelectValue placeholder="Étape" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes</SelectItem>
+                <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="confirmed">Confirmées</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select>
+              <SelectTrigger className="w-32">
                 <SelectValue placeholder="Livreur" />
               </SelectTrigger>
               <SelectContent>
@@ -191,7 +271,7 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
             </Select>
             <Select>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="Echange" />
+                <SelectValue placeholder="Échange" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous</SelectItem>
@@ -240,9 +320,11 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
                 <SelectItem value="store">Magasin</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center space-x-4">
             <Select>
               <SelectTrigger className="w-32">
-                <SelectValue placeholder="Equipe" />
+                <SelectValue placeholder="Équipe" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous</SelectItem>
@@ -250,11 +332,11 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
                 <SelectItem value="team2">Équipe 2</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">Date d'entrée</span>
-            <div className="flex items-center space-x-2 bg-white border rounded px-3 py-2">
-              <Calendar className="w-4 h-4 text-gray-400" />
+            <div className="flex items-center space-x-2">
+              <span className="text-sm">Date d'entrée</span>
+              <div className="flex items-center space-x-2 bg-white border rounded px-3 py-2">
+                <Calendar className="w-4 h-4 text-gray-400" />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -298,7 +380,35 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
             Dupliquer
           </Button>
         </div>
-        <div className="text-sm text-gray-600">Organiser le tableau ⋮</div>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600">Organiser le tableau</span>
+          <Popover open={showColumnSelector} onOpenChange={setShowColumnSelector}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" align="end">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Colonnes à afficher</h4>
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {columnSettings.map((column) => (
+                    <div key={column.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={column.id}
+                        checked={column.visible}
+                        onCheckedChange={() => toggleColumnVisibility(column.id)}
+                      />
+                      <label htmlFor={column.id} className="text-sm cursor-pointer">
+                        {column.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       {/* Orders Table */}
@@ -314,15 +424,11 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
                       onCheckedChange={handleSelectAll}
                     />
                   </th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">CLIENT</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">RÉFÉRENCE</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">GOUVERNORAT</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">TOTAL</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">TRANSPORT</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">CRÉÉE PAR</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">PAYÉE LE</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">TÉL</th>
-                  <th className="p-3 text-left text-sm font-medium text-gray-600">À LIVRER LE</th>
+                  {visibleColumns.map((column) => (
+                    <th key={column.id} className="p-3 text-left text-sm font-medium text-gray-600 uppercase">
+                      {column.label}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -334,42 +440,50 @@ export default function OrderManagement({ onAddOrder }: OrderManagementProps) {
                         onCheckedChange={() => handleSelectOrder(order.id)}
                       />
                     </td>
-                    <td className="p-3">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
-                          👤
-                        </div>
-                        <span className="font-medium underline cursor-pointer">{order.client}</span>
-                      </div>
-                    </td>
-                    <td className="p-3">
-                      <span className="text-blue-600 underline cursor-pointer">{order.reference}</span>
-                    </td>
-                    <td className="p-3">{order.governorate}</td>
-                    <td className="p-3 font-medium">{order.total}</td>
-                    <td className="p-3">
-                      <div className="flex items-center space-x-2">
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                          {order.transport}
-                        </span>
-                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs">✓</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3">{order.createdBy}</td>
-                    <td className="p-3">-</td>
-                    <td className="p-3">
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" className="text-xs bg-transparent">
-                          📞 {order.phone}
-                        </Button>
-                        <Button variant="outline" size="sm" className="bg-green-500 text-white text-xs">
-                          📱 WhatsApp
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="p-3">-</td>
+                    {visibleColumns.map((column) => (
+                      <td key={column.id} className="p-3">
+                        {column.id === "client" && (
+                          <div className="flex items-center space-x-2">
+                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
+                              👤
+                            </div>
+                            <span className="font-medium underline cursor-pointer text-blue-600">{order.client}</span>
+                          </div>
+                        )}
+                        {column.id === "reference" && (
+                          <span className="text-blue-600 underline cursor-pointer">{order.reference}</span>
+                        )}
+                        {column.id === "status" && (
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        )}
+                        {column.id === "gouvernorat" && <span>{order.gouvernorat}</span>}
+                        {column.id === "total" && <span className="font-medium">{order.total}</span>}
+                        {column.id === "transporteur" && (
+                          <div className="flex items-center space-x-2">
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                              {order.transporteur}
+                            </span>
+                            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs">✓</span>
+                            </div>
+                          </div>
+                        )}
+                        {column.id === "nb_articles" && <span>{order.nb_articles}</span>}
+                        {column.id === "creee_par" && <span>{order.creee_par}</span>}
+                        {column.id === "tel" && (
+                          <div className="flex items-center space-x-2">
+                            <Button variant="outline" size="sm" className="text-xs bg-transparent">
+                              📞 {order.tel}
+                            </Button>
+                            <Button variant="outline" size="sm" className="bg-green-500 text-white text-xs">
+                              📱 WhatsApp
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
