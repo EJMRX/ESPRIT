@@ -9,6 +9,9 @@ import { Search, Power, Lock, Play } from "lucide-react"
 import AddModifyOrderModal from "@/components/add-modify-order-modal"
 import OrderManagement from "@/components/order-management"
 import CatalogSearch from "@/components/catalog-search"
+import SalesDashboard from "@/components/sales-dashboard"
+import OrderSearch from "@/components/order-search"
+import QuoteSearch from "@/components/quote-search"
 
 const backendMenus = {
   bureau: {
@@ -51,6 +54,7 @@ const backendMenus = {
       { id: "expedition_douchette", name: "Expédition Avec Douchette" },
       { id: "retour_douchette", name: "Retour Avec Douchette" },
       { id: "manifests", name: "Manifests" },
+      { id: "recherche_commandes_clients", name: "Recherche de commandes clients en cours" },
     ],
   },
   ventes: {
@@ -64,6 +68,7 @@ const backendMenus = {
       { id: "document_nouveau_cdc", name: "Nouvelle Commande" },
       { id: "document_nouveau_blc", name: "Nouveau Bon de Livraison" },
       { id: "document_nouveau_fac", name: "Nouvelle Facture" },
+      { id: "recherche_devis_clients", name: "Recherche de devis clients en cours" },
     ],
   },
   achats: {
@@ -152,6 +157,10 @@ export default function POSSystem() {
   const [showOrderManagement, setShowOrderManagement] = useState(false)
   const [showCatalogSearch, setShowCatalogSearch] = useState(false)
   const [buttonLayout, setButtonLayout] = useState("advanced") // "advanced" or "return"
+  const [showSalesDashboard, setShowSalesDashboard] = useState(false)
+  const [showOrderSearch, setShowOrderSearch] = useState(false)
+  const [showQuoteSearch, setShowQuoteSearch] = useState(false)
+  const [showProductSearchEnhanced, setShowProductSearchEnhanced] = useState(false)
 
   const handleNumberClick = (num: string) => {
     if (displayValue === "0.000") {
@@ -302,6 +311,422 @@ export default function POSSystem() {
           </div>
 
           <CatalogSearch />
+          <AddModifyOrderModal isOpen={showAddOrderModal} onClose={() => setShowAddOrderModal(false)} />
+        </div>
+      )
+    }
+
+    // Show Sales Dashboard when tableau_bord_ventes is active
+    if (showSalesDashboard) {
+      return (
+        <div className="min-h-screen bg-white">
+          <div className="bg-blue-600 text-white p-2">
+            <div className="flex justify-between items-center max-w-7xl mx-auto">
+              <div className="flex space-x-6 relative">
+                {Object.entries(backendMenus).map(([key, menu]) => (
+                  <div
+                    key={key}
+                    className="relative"
+                    onMouseEnter={() => setHoveredMenu(key)}
+                    onMouseLeave={() => setHoveredMenu(null)}
+                  >
+                    <button
+                      onClick={() => {
+                        setActiveBackendMenu(key)
+                        if (key !== "ventes") {
+                          setShowSalesDashboard(false)
+                          setShowOrderSearch(false)
+                          setShowQuoteSearch(false)
+                          setShowProductSearchEnhanced(false)
+                          setShowCatalogSearch(false)
+                          setShowOrderManagement(false)
+                        }
+                      }}
+                      className={`px-4 py-2 rounded ${activeBackendMenu === key ? "bg-blue-500" : "hover:bg-blue-700"}`}
+                    >
+                      {menu.name}
+                    </button>
+
+                    {hoveredMenu === key && menu.items.length > 0 && (
+                      <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 text-black">
+                        <div className="py-2">
+                          {menu.items.map((item, index) => (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                if (item.id === "ajouter_modifier_commande") {
+                                  setShowAddOrderModal(true)
+                                } else if (item.id === "catalogue_recherche") {
+                                  setShowCatalogSearch(true)
+                                  setShowSalesDashboard(false)
+                                  setShowOrderSearch(false)
+                                  setShowQuoteSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowOrderManagement(false)
+                                } else if (item.id === "tableau_bord_ventes") {
+                                  setShowSalesDashboard(true)
+                                  setShowOrderSearch(false)
+                                  setShowQuoteSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowCatalogSearch(false)
+                                  setShowOrderManagement(false)
+                                } else if (item.id === "recherche_commandes_clients") {
+                                  setShowOrderSearch(true)
+                                  setShowSalesDashboard(false)
+                                  setShowQuoteSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowCatalogSearch(false)
+                                  setShowOrderManagement(false)
+                                } else if (item.id === "recherche_devis_clients") {
+                                  setShowQuoteSearch(true)
+                                  setShowSalesDashboard(false)
+                                  setShowOrderSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowCatalogSearch(false)
+                                  setShowOrderManagement(false)
+                                } else {
+                                  console.log(`Clicked: ${item.name}`)
+                                }
+                                setHoveredMenu(null)
+                                setActiveBackendMenu(key)
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            >
+                              {item.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                  className="px-4 py-2 bg-blue-500 rounded font-medium"
+                >
+                  Options
+                </button>
+
+                {showOptionsMenu && (
+                  <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded shadow-lg z-50 text-black">
+                    <div className="p-4">
+                      <div className="font-bold mb-2">Interface en cours</div>
+                      <div className="space-y-1 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 bg-green-500 rounded"></div>
+                          <span className="text-sm">Interface Collaborateur</span>
+                        </div>
+                        <button
+                          onClick={() => setCurrentView("pos")}
+                          className="flex items-center space-x-2 text-sm hover:bg-gray-100 w-full p-1 rounded"
+                        >
+                          <div className="w-4 h-4 bg-gray-300 rounded"></div>
+                          <span>Interface Caisse</span>
+                        </button>
+                      </div>
+
+                      <hr className="my-2" />
+
+                      <div className="font-bold mb-2">Magasin en cours</div>
+                      <div className="space-y-1 mb-4">
+                        {stores.map((store) => (
+                          <button
+                            key={store.id}
+                            onClick={() => setActiveStore(store.id)}
+                            className="flex items-center space-x-2 text-sm hover:bg-gray-100 w-full p-1 rounded"
+                          >
+                            <div
+                              className={`w-4 h-4 ${store.id === activeStore ? "bg-green-500" : "bg-gray-300"} rounded`}
+                            ></div>
+                            <span>{store.name}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <hr className="my-2" />
+
+                      <button
+                        onClick={() => setCurrentView("pos")}
+                        className="text-sm hover:bg-gray-100 w-full p-1 rounded text-left"
+                      >
+                        Déconnexion
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <SalesDashboard />
+          <AddModifyOrderModal isOpen={showAddOrderModal} onClose={() => setShowAddOrderModal(false)} />
+        </div>
+      )
+    }
+
+    // Show Order Search when recherche_commandes_clients is active
+    if (showOrderSearch) {
+      return (
+        <div className="min-h-screen bg-white">
+          <div className="bg-blue-600 text-white p-2">
+            <div className="flex justify-between items-center max-w-7xl mx-auto">
+              <div className="flex space-x-6 relative">
+                {Object.entries(backendMenus).map(([key, menu]) => (
+                  <div
+                    key={key}
+                    className="relative"
+                    onMouseEnter={() => setHoveredMenu(key)}
+                    onMouseLeave={() => setHoveredMenu(null)}
+                  >
+                    <button
+                      onClick={() => {
+                        setActiveBackendMenu(key)
+                        if (key !== "commandes") {
+                          setShowOrderSearch(false)
+                          setShowSalesDashboard(false)
+                          setShowQuoteSearch(false)
+                          setShowProductSearchEnhanced(false)
+                          setShowCatalogSearch(false)
+                          setShowOrderManagement(false)
+                        }
+                      }}
+                      className={`px-4 py-2 rounded ${activeBackendMenu === key ? "bg-blue-500" : "hover:bg-blue-700"}`}
+                    >
+                      {menu.name}
+                    </button>
+
+                    {hoveredMenu === key && menu.items.length > 0 && (
+                      <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 text-black">
+                        <div className="py-2">
+                          {menu.items.map((item, index) => (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                if (item.id === "ajouter_modifier_commande") {
+                                  setShowAddOrderModal(true)
+                                } else if (item.id === "recherche_commandes_clients") {
+                                  setShowOrderSearch(true)
+                                  setShowSalesDashboard(false)
+                                  setShowQuoteSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowCatalogSearch(false)
+                                  setShowOrderManagement(false)
+                                } else {
+                                  console.log(`Clicked: ${item.name}`)
+                                }
+                                setHoveredMenu(null)
+                                setActiveBackendMenu(key)
+                                if (key === "commandes") {
+                                  setShowOrderManagement(true)
+                                }
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            >
+                              {item.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                  className="px-4 py-2 bg-blue-500 rounded font-medium"
+                >
+                  Options
+                </button>
+
+                {showOptionsMenu && (
+                  <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded shadow-lg z-50 text-black">
+                    <div className="p-4">
+                      <div className="font-bold mb-2">Interface en cours</div>
+                      <div className="space-y-1 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 bg-green-500 rounded"></div>
+                          <span className="text-sm">Interface Collaborateur</span>
+                        </div>
+                        <button
+                          onClick={() => setCurrentView("pos")}
+                          className="flex items-center space-x-2 text-sm hover:bg-gray-100 w-full p-1 rounded"
+                        >
+                          <div className="w-4 h-4 bg-gray-300 rounded"></div>
+                          <span>Interface Caisse</span>
+                        </button>
+                      </div>
+
+                      <hr className="my-2" />
+
+                      <div className="font-bold mb-2">Magasin en cours</div>
+                      <div className="space-y-1 mb-4">
+                        {stores.map((store) => (
+                          <button
+                            key={store.id}
+                            onClick={() => setActiveStore(store.id)}
+                            className="flex items-center space-x-2 text-sm hover:bg-gray-100 w-full p-1 rounded"
+                          >
+                            <div
+                              className={`w-4 h-4 ${store.id === activeStore ? "bg-green-500" : "bg-gray-300"} rounded`}
+                            ></div>
+                            <span>{store.name}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <hr className="my-2" />
+
+                      <button
+                        onClick={() => setCurrentView("pos")}
+                        className="text-sm hover:bg-gray-100 w-full p-1 rounded text-left"
+                      >
+                        Déconnexion
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <OrderSearch />
+          <AddModifyOrderModal isOpen={showAddOrderModal} onClose={() => setShowAddOrderModal(false)} />
+        </div>
+      )
+    }
+
+    // Show Quote Search when recherche_devis_clients is active
+    if (showQuoteSearch) {
+      return (
+        <div className="min-h-screen bg-white">
+          <div className="bg-blue-600 text-white p-2">
+            <div className="flex justify-between items-center max-w-7xl mx-auto">
+              <div className="flex space-x-6 relative">
+                {Object.entries(backendMenus).map(([key, menu]) => (
+                  <div
+                    key={key}
+                    className="relative"
+                    onMouseEnter={() => setHoveredMenu(key)}
+                    onMouseLeave={() => setHoveredMenu(null)}
+                  >
+                    <button
+                      onClick={() => {
+                        setActiveBackendMenu(key)
+                        if (key !== "ventes") {
+                          setShowQuoteSearch(false)
+                          setShowSalesDashboard(false)
+                          setShowOrderSearch(false)
+                          setShowProductSearchEnhanced(false)
+                          setShowCatalogSearch(false)
+                          setShowOrderManagement(false)
+                        }
+                      }}
+                      className={`px-4 py-2 rounded ${activeBackendMenu === key ? "bg-blue-500" : "hover:bg-blue-700"}`}
+                    >
+                      {menu.name}
+                    </button>
+
+                    {hoveredMenu === key && menu.items.length > 0 && (
+                      <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded shadow-lg z-50 text-black">
+                        <div className="py-2">
+                          {menu.items.map((item, index) => (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                if (item.id === "recherche_devis_clients") {
+                                  setShowQuoteSearch(true)
+                                  setShowSalesDashboard(false)
+                                  setShowOrderSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowCatalogSearch(false)
+                                  setShowOrderManagement(false)
+                                } else if (item.id === "tableau_bord_ventes") {
+                                  setShowSalesDashboard(true)
+                                  setShowQuoteSearch(false)
+                                  setShowOrderSearch(false)
+                                  setShowProductSearchEnhanced(false)
+                                  setShowCatalogSearch(false)
+                                  setShowOrderManagement(false)
+                                } else {
+                                  console.log(`Clicked: ${item.name}`)
+                                }
+                                setHoveredMenu(null)
+                                setActiveBackendMenu(key)
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            >
+                              {item.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                  className="px-4 py-2 bg-blue-500 rounded font-medium"
+                >
+                  Options
+                </button>
+
+                {showOptionsMenu && (
+                  <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded shadow-lg z-50 text-black">
+                    <div className="p-4">
+                      <div className="font-bold mb-2">Interface en cours</div>
+                      <div className="space-y-1 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 bg-green-500 rounded"></div>
+                          <span className="text-sm">Interface Collaborateur</span>
+                        </div>
+                        <button
+                          onClick={() => setCurrentView("pos")}
+                          className="flex items-center space-x-2 text-sm hover:bg-gray-100 w-full p-1 rounded"
+                        >
+                          <div className="w-4 h-4 bg-gray-300 rounded"></div>
+                          <span>Interface Caisse</span>
+                        </button>
+                      </div>
+
+                      <hr className="my-2" />
+
+                      <div className="font-bold mb-2">Magasin en cours</div>
+                      <div className="space-y-1 mb-4">
+                        {stores.map((store) => (
+                          <button
+                            key={store.id}
+                            onClick={() => setActiveStore(store.id)}
+                            className="flex items-center space-x-2 text-sm hover:bg-gray-100 w-full p-1 rounded"
+                          >
+                            <div
+                              className={`w-4 h-4 ${store.id === activeStore ? "bg-green-500" : "bg-gray-300"} rounded`}
+                            ></div>
+                            <span>{store.name}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <hr className="my-2" />
+
+                      <button
+                        onClick={() => setCurrentView("pos")}
+                        className="text-sm hover:bg-gray-100 w-full p-1 rounded text-left"
+                      >
+                        Déconnexion
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <QuoteSearch />
           <AddModifyOrderModal isOpen={showAddOrderModal} onClose={() => setShowAddOrderModal(false)} />
         </div>
       )
@@ -468,6 +893,27 @@ export default function POSSystem() {
                               } else if (item.id === "catalogue_recherche") {
                                 setShowCatalogSearch(true)
                                 setShowOrderManagement(false)
+                              } else if (item.id === "tableau_bord_ventes") {
+                                setShowSalesDashboard(true)
+                                setShowOrderSearch(false)
+                                setShowQuoteSearch(false)
+                                setShowProductSearchEnhanced(false)
+                                setShowCatalogSearch(false)
+                                setShowOrderManagement(false)
+                              } else if (item.id === "recherche_commandes_clients") {
+                                setShowOrderSearch(true)
+                                setShowSalesDashboard(false)
+                                setShowQuoteSearch(false)
+                                setShowProductSearchEnhanced(false)
+                                setShowCatalogSearch(false)
+                                setShowOrderManagement(false)
+                              } else if (item.id === "recherche_devis_clients") {
+                                setShowQuoteSearch(true)
+                                setShowSalesDashboard(false)
+                                setShowOrderSearch(false)
+                                setShowProductSearchEnhanced(false)
+                                setShowCatalogSearch(false)
+                                setShowOrderManagement(false)
                               } else {
                                 console.log(`Clicked: ${item.name}`)
                               }
@@ -565,6 +1011,12 @@ export default function POSSystem() {
                           setShowAddOrderModal(true)
                         } else if (item.id === "catalogue_recherche") {
                           setShowCatalogSearch(true)
+                        } else if (item.id === "tableau_bord_ventes") {
+                          setShowSalesDashboard(true)
+                        } else if (item.id === "recherche_commandes_clients") {
+                          setShowOrderSearch(true)
+                        } else if (item.id === "recherche_devis_clients") {
+                          setShowQuoteSearch(true)
                         } else {
                           console.log(`Clicked: ${item.name}`)
                         }
